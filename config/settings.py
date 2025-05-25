@@ -26,6 +26,7 @@ env = environ.Env(
 environ.Env.read_env(Path(BASE_DIR) / '.env')
 
 SECRET_KEY = env('SECRET_KEY')
+OPENAI_API_KEY = env('OPENAI_API_KEY')
 
 # False if not in environ because of casting above
 DEBUG = env('DEBUG')
