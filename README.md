@@ -34,3 +34,5 @@ graph LR
 4. API endpoint for dietary analysis
 5. Basic authentication layer
 6. Azure deployment with Docker
+
+A more detailed plan can be viewed in the [SurveyGorilla project](https://github.com/users/sharbeldahlan/projects/4)'s Kanban board.
