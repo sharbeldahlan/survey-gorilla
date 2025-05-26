@@ -54,6 +54,7 @@ def simulate_conversation() -> None:
     """
     Simulate n conversations: ask the question, store raw answer,
     classify diet and parse foods, then update the Conversation record.
+    Errors in classification skip updating that record.
     """
     answer = ask_question(question=QUESTION_PROMPT, gpt_model=RANDOMIZER_GPT_MODEL)
 
@@ -61,10 +62,14 @@ def simulate_conversation() -> None:
         question_text=QUESTION_PROMPT,
         answer_text=answer
     )
-    result = classify_diet(answer=answer, prompt=CLASSIFY_PROMPT, gpt_model=CLASSIFIER_GPT_MODEL)
-    foods = result.get("foods")
-    diet = result.get("diet")
 
-    conversation.favorite_foods = foods
-    conversation.diet_type = diet
-    conversation.save()
+    try:
+        result = classify_diet(answer=answer, prompt=CLASSIFY_PROMPT, gpt_model=CLASSIFIER_GPT_MODEL)
+        foods = result.get("foods")
+        diet = result.get("diet")
+
+        conversation.favorite_foods = foods
+        conversation.diet_type = diet
+        conversation.save()
+    except json.JSONDecodeError:
+        pass

@@ -82,3 +82,22 @@ def test_simulate_conversation__creates_conversations(monkeypatch):
     assert conversation.answer_text == "I love pizza, sushi, and salad."
     assert conversation.favorite_foods == ["pizza", "sushi", "salad"]
     assert conversation.diet_type == Conversation.DietType.OMNIVORE
+
+
+@pytest.mark.django_db
+def test_simulate_conversation__handles_bad_json(monkeypatch):
+    """ Test simulate_conversation handles malformed JSON gracefully (does not write to database). """
+    mock_answer = "I love everything."
+    mock_client = MagicMock()
+    mock_client.chat.completions.create.side_effect = [
+        MagicMock(choices=[MagicMock(message=MagicMock(content=mock_answer))]),
+        MagicMock(choices=[MagicMock(message=MagicMock(content="NOT_JSON"))])
+    ]
+    monkeypatch.setattr('applications.surveys.services.client', mock_client)
+
+    simulate_conversation()
+
+    conversation = Conversation.objects.first()
+    # favorite_foods should remain default empty list and diet_type None
+    assert conversation.favorite_foods == []
+    assert conversation.diet_type is None
