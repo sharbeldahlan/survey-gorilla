@@ -10,10 +10,12 @@ from applications.constants import (
     CLASSIFY_PROMPT,
     QUESTION_PROMPT,
 )
+from applications.logging import get_logger
 from applications.surveys.models import Conversation
 
 
 client = OpenAI(api_key=settings.OPENAI_API_KEY)
+logger = get_logger(__name__)
 
 
 def ask_question(question: str, gpt_model: str) -> str:
@@ -52,9 +54,14 @@ def classify_diet(answer: str, prompt: str, gpt_model: str) -> dict:
 
 def simulate_conversation() -> None:
     """
-    Simulate n conversations: ask the question, store raw answer,
-    classify diet and parse foods, then update the Conversation record.
-    Errors in classification skip updating that record.
+    Simulate and process a single food preference conversation.
+
+    Performs these operations in sequence:
+      - Generates a randomized answer to the food preference question.
+      - Creates a base Conversation record with the raw answer.
+      - Attempts to classify the diet type and extract food items.
+      - Updates the record with classification results if successful.
+      - Logs the failure and conversation ID if not successful.
     """
     answer = ask_question(question=QUESTION_PROMPT, gpt_model=RANDOMIZER_GPT_MODEL)
 
@@ -71,5 +78,5 @@ def simulate_conversation() -> None:
         conversation.favorite_foods = foods
         conversation.diet_type = diet
         conversation.save()
-    except json.JSONDecodeError:
-        pass
+    except json.JSONDecodeError as e:
+        logger.warning("Classification failed for conversation ID %s: %s", conversation.id, e)

@@ -85,7 +85,7 @@ def test_simulate_conversation__creates_conversations(monkeypatch):
 
 
 @pytest.mark.django_db
-def test_simulate_conversation__handles_bad_json(monkeypatch):
+def test_simulate_conversation__handles_bad_json(monkeypatch, caplog):
     """ Test simulate_conversation handles malformed JSON gracefully (does not write to database). """
     mock_answer = "I love everything."
     mock_client = MagicMock()
@@ -101,3 +101,8 @@ def test_simulate_conversation__handles_bad_json(monkeypatch):
     # favorite_foods should remain default empty list and diet_type None
     assert conversation.favorite_foods == []
     assert conversation.diet_type is None
+    assert any(
+        "Classification failed for conversation ID" in record.message
+        for record in caplog.records
+    )
+    assert any(record.levelname == "WARNING" for record in caplog.records)
