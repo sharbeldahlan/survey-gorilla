@@ -1,3 +1,4 @@
+""" Urls that are specific to the insights app """
 from django.urls import path
 
 from applications.insights import views
