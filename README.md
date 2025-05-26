@@ -39,6 +39,33 @@ This project runs fully containerized using Docker Compose.
    poetry run mypy applications/
    ```
 
+## Sample API Usage
+
+Request
+```
+GET /api/insights/conversations?diet=vegan,vegetarian
+```
+
+Response
+```json
+[
+  {
+    "id": "df0195c7-45be-4ab3-9b7a-08d123abcxyz",
+    "diet_type": "vegan",
+    "favorite_foods": ["tofu", "kale", "lentils"],
+    "created_at": "2025-05-26T12:34:56Z"
+  },
+  {
+    "id": "a7b49a11-2f61-4933-82b0-fd1c009fdcde",
+    "diet_type": "vegetarian",
+    "favorite_foods": ["cheese", "avocado", "mushrooms"],
+    "created_at": "2025-05-26T12:35:01Z"
+  }
+]
+```
+To fetch all conversations, simply omit the `diet` query parameter.
+
+
 ## Project Intent
 Automate survey analysis using AI to:
 - Simulate human-like conversation surveys using ChatGPT.
