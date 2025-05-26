@@ -1,0 +1,46 @@
+"""
+Tests for insights/views.py
+These are more like end-to-end since they test logic of the models, serializers, views, and services.
+"""
+import pytest
+from rest_framework.test import APIClient
+from rest_framework import status
+from django.urls import reverse
+
+from applications.surveys.models import Conversation
+
+
+@pytest.mark.django_db
+def test_get_conversations__filtered_by_valid_diets():
+    """ Simulate the GET endpoint when filtered by valid diets. """
+    Conversation.objects.create(
+        diet_type=Conversation.DietType.VEGAN,
+        favorite_foods=["tofu", "kale", "lentils"]
+    )
+    Conversation.objects.create(
+        diet_type=Conversation.DietType.VEGETARIAN,
+        favorite_foods=["cheese", "mushrooms", "avocado"]
+    )
+    Conversation.objects.create(
+        diet_type=Conversation.DietType.OMNIVORE,
+        favorite_foods=["steak", "chicken", "eggs"]
+    )
+
+    client = APIClient()
+    url = reverse("conversation-insights") + "?diet=vegan,vegetarian"
+    response = client.get(url)
+
+    assert response.status_code == status.HTTP_200_OK
+    results = response.json()
+    assert len(results) == 2
+    assert all(r["diet_type"] in ["vegan", "vegetarian"] for r in results)
+
+
+@pytest.mark.django_db
+def test_get_conversations__empty_diet_param():
+    """ Simulate that the view works with empty diet param. """
+    client = APIClient()
+    url = reverse("conversation-insights") + "?diet="
+    response = client.get(url)
+
+    assert response.status_code == status.HTTP_200_OK

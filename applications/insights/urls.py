@@ -1,8 +1,8 @@
-""" Urls that are specific to the insights app """
+""" URL configuration for the insights application. """
 from django.urls import path
 
-from applications.insights import views
+from applications.insights.views import ConversationInsightsView
 
 urlpatterns = [
-    path('insights', views.get_insights, name='insights'),
+    path('insights/conversations', ConversationInsightsView.as_view(), name='conversation-insights'),
 ]
