@@ -3,7 +3,24 @@
 import pytest
 from django.utils import timezone
 from applications.surveys.models import Conversation
-from applications.insights.services import get_conversations_by_diet
+from applications.insights.services import (
+    get_conversations_by_diet,
+    parse_diet_query_param,
+)
+
+
+def test_parse_diet_query_param__valid():
+    result = parse_diet_query_param("vegan, vegetarian")
+    assert sorted(result) == ["vegan", "vegetarian"]
+
+
+def test_parse_diet_query_param__invalid():
+    with pytest.raises(ValueError, match="Invalid diet types"):
+        parse_diet_query_param("meatarian")
+
+
+def test_parse_diet_query_param__empty():
+    assert parse_diet_query_param("") == []
 
 
 @pytest.mark.django_db
