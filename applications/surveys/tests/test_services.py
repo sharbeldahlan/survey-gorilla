@@ -11,30 +11,33 @@ from applications.surveys.services import (
 )
 
 
-@pytest.mark.django_db
-def test_ask_question__returns_text(monkeypatch):
-    """ Trivial test case for mocked simple ChatGPT prompt. """
+@pytest.fixture(name="mock_openai")
+def fixture_mock_openai(monkeypatch):
+    """ Fixture to patch OpenAI client and return controllable responses. """
     mock_client = MagicMock()
-    mock_client.chat.completions.create.return_value = MagicMock(
+    monkeypatch.setattr('applications.surveys.services.client', mock_client)
+    return mock_client
+
+
+@pytest.mark.django_db
+def test_ask_question__returns_text(mock_openai):
+    """ Trivial test case for mocked simple ChatGPT prompt. """
+    mock_openai.chat.completions.create.return_value = MagicMock(
         choices=[MagicMock(message=MagicMock(content="growl"))]
     )
-    monkeypatch.setattr('applications.surveys.services.client', mock_client)
-
     text = ask_question("hey gorilla!", 'mock model')
     assert text == "growl"
     assert isinstance(text, str)
 
 
 @pytest.mark.django_db
-def test_classify_diet__parses_json(monkeypatch):
+def test_classify_diet__parses_json(mock_openai):
     """ Test that classify_diet function correctly returns a dict with keys 'foods' (list[str]) and 'diet' (str). """
     mock_answer = "irrelevant"
     mock_json = '{"foods": ["tofu", "lentils", "kale"], "diet": "vegan"}'
-    mock_client = MagicMock()
-    mock_client.chat.completions.create.return_value = MagicMock(
+    mock_openai.chat.completions.create.return_value = MagicMock(
         choices=[MagicMock(message=MagicMock(content=mock_json))]
     )
-    monkeypatch.setattr('applications.surveys.services.client', mock_client)
 
     result = classify_diet(mock_answer, 'mock prompt', 'mock model')
     assert result["foods"] == ["tofu", "lentils", "kale"]
@@ -42,54 +45,47 @@ def test_classify_diet__parses_json(monkeypatch):
 
 
 @pytest.mark.django_db
-def test_classify_diet__raises_on_invalid_json(monkeypatch):
+def test_classify_diet__raises_on_invalid_json(mock_openai):
     """ Test that classify_diet propagates JSON errors. """
-    mock_client = MagicMock()
-    mock_client.chat.completions.create.return_value = MagicMock(
+    mock_openai.chat.completions.create.return_value = MagicMock(
         choices=[MagicMock(message=MagicMock(content="INVALID JSON"))]
     )
-    monkeypatch.setattr('applications.surveys.services.client', mock_client)
 
     with pytest.raises(json.JSONDecodeError):
         classify_diet("bad answer", 'mock prompt', 'mock model')
 
 
 @pytest.mark.django_db
-def test_classify_diet__raises_on_invalid_structure(monkeypatch):
+def test_classify_diet__raises_on_invalid_structure(mock_openai):
     """ Should raise ValueError for valid JSON with wrong structure """
-    mock_client = MagicMock()
-    mock_client.chat.completions.create.return_value = MagicMock(
+    mock_openai.chat.completions.create.return_value = MagicMock(
         choices=[MagicMock(message=MagicMock(
             content='{"foods": ["kale"], "diet": "vegetarian"}'
         ))]
     )
-    monkeypatch.setattr('applications.surveys.services.client', mock_client)
 
     with pytest.raises(ValueError, match="Invalid 'foods' format"):
         classify_diet("answer", 'mock prompt', 'mock model')
 
 
 @pytest.mark.django_db
-def test_classify_diet__raises_on_invalid_diet(monkeypatch):
+def test_classify_diet__raises_on_invalid_diet(mock_openai):
     """ Should raise ValueError for unknown diet """
-    mock_client = MagicMock()
-    mock_client.chat.completions.create.return_value = MagicMock(
+    mock_openai.chat.completions.create.return_value = MagicMock(
         choices=[MagicMock(message=MagicMock(
             content='{"foods": ["apple", "banana", "kale"], "diet": "meatitarian"}'
         ))]
     )
-    monkeypatch.setattr('applications.surveys.services.client', mock_client)
 
     with pytest.raises(ValueError, match="Invalid diet classification"):
         classify_diet("answer", 'mock prompt', 'mock model')
 
 
 @pytest.mark.django_db
-def test_simulate_conversation__creates_conversations(monkeypatch):
+def test_simulate_conversation__creates_conversations(mock_openai):
     """ Happy path test """
     # Arrange
-    mock_client = MagicMock()
-    mock_client.chat.completions.create.side_effect = [
+    mock_openai.chat.completions.create.side_effect = [
         # First response (food answer)
         MagicMock(choices=[
             MagicMock(message=MagicMock(content="I love pizza, sushi, and salad."))
@@ -101,7 +97,6 @@ def test_simulate_conversation__creates_conversations(monkeypatch):
             ))
         ])
     ]
-    monkeypatch.setattr("applications.surveys.services.client", mock_client)
 
     # Act: run the service
     simulate_conversation()
@@ -115,15 +110,13 @@ def test_simulate_conversation__creates_conversations(monkeypatch):
 
 
 @pytest.mark.django_db
-def test_simulate_conversation__handles_bad_json(monkeypatch, caplog):
+def test_simulate_conversation__handles_bad_json(mock_openai, caplog):
     """ Test simulate_conversation handles malformed JSON gracefully (does not write to database). """
     mock_answer = "I love everything."
-    mock_client = MagicMock()
-    mock_client.chat.completions.create.side_effect = [
+    mock_openai.chat.completions.create.side_effect = [
         MagicMock(choices=[MagicMock(message=MagicMock(content=mock_answer))]),
         MagicMock(choices=[MagicMock(message=MagicMock(content="NOT_JSON"))])
     ]
-    monkeypatch.setattr('applications.surveys.services.client', mock_client)
 
     simulate_conversation()
 
