@@ -23,10 +23,10 @@ Automate survey analysis using AI to:
 Here is a high level diagram illustrating what the system is composed of:
 
 ```mermaid
-graph LR
-    A[User/Browser] -->|GET /api/insights| B[Insight Service]
+graph TD
+    A[User/Browser] -->|GET /api/insights| B[Insights Service]
     B -->|Query survey data| C[(SQL Database)]
-    E[Survey Service] -->|Conduct surveys| D[OpenAI<br>ChatGPT]
+    E[Surveys Service] -->|Conduct surveys| D[OpenAI<br>ChatGPT]
     E -->|Save survey responses| C
     subgraph G[Django Backend]
         B
