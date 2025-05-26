@@ -1,0 +1,8 @@
+[MASTER]
+ignore=migrations
+
+[MESSAGES CONTROL]
+disable=
+    too-many-ancestors,  # Handles this case in models: SomeFieldChoices(models.TextChoices)
+    no-member,  # Disables "Class has no 'objects' member" for Django models
+    line-too-long  # Handled by flake8
