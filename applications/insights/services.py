@@ -23,4 +23,6 @@ def parse_diet_query_param(param: str | None) -> list[str]:
 
 def get_conversations_by_diet(diet_filters: list[str]) -> QuerySet[Conversation]:
     """ Returns a queryset of conversations filtered by diet types. """
+    if not diet_filters:
+        return Conversation.objects.all()
     return Conversation.objects.filter(diet_type__in=diet_filters).order_by("-created_at")
