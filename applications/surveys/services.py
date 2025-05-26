@@ -36,6 +36,7 @@ def classify_diet(answer: str, prompt: str, gpt_model: str) -> dict:
     """
     Classify the diet and extract foods from an answer via ChatGPT.
     Returns a dict with keys 'foods' (list[str]) and 'diet' (str).
+    Raises ValueError for any unexpected response format.
     """
     resp = client.chat.completions.create(
         model=gpt_model,
@@ -48,8 +49,27 @@ def classify_diet(answer: str, prompt: str, gpt_model: str) -> dict:
     content = resp.choices[0].message.content
     if not content:
         raise ValueError("Empty response from GPT")
-    # Expecting a JSON string from the assistant
-    return json.loads(content)
+
+    try:
+        parsed = json.loads(content)
+    except json.JSONDecodeError as e:
+        raise json.JSONDecodeError(f"Invalid JSON from GPT: {content}", content, e.pos)
+
+    # Validate structure
+    foods = parsed.get("foods")
+    diet = parsed.get("diet")
+
+    if not isinstance(foods, list) or len(foods) != 3 or not all(isinstance(f, str) for f in foods):
+        raise ValueError(f"Invalid 'foods' format: {foods}")
+
+    if diet not in {
+        Conversation.DietType.VEGAN,
+        Conversation.DietType.VEGETARIAN,
+        Conversation.DietType.OMNIVORE,
+    }:
+        raise ValueError(f"Invalid diet classification: {diet}")
+
+    return {"foods": foods, "diet": diet}
 
 
 def simulate_conversation() -> None:
@@ -72,11 +92,8 @@ def simulate_conversation() -> None:
 
     try:
         result = classify_diet(answer=answer, prompt=CLASSIFY_PROMPT, gpt_model=CLASSIFIER_GPT_MODEL)
-        foods = result.get("foods")
-        diet = result.get("diet")
-
-        conversation.favorite_foods = foods
-        conversation.diet_type = diet
+        conversation.favorite_foods = result["foods"]
+        conversation.diet_type = result["diet"]
         conversation.save()
-    except json.JSONDecodeError as e:
+    except (json.JSONDecodeError, ValueError) as e:
         logger.warning("Classification failed for conversation ID %s: %s", conversation.id, e)

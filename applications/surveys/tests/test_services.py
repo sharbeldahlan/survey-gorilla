@@ -55,6 +55,36 @@ def test_classify_diet__raises_on_invalid_json(monkeypatch):
 
 
 @pytest.mark.django_db
+def test_classify_diet__raises_on_invalid_structure(monkeypatch):
+    """ Should raise ValueError for valid JSON with wrong structure """
+    mock_client = MagicMock()
+    mock_client.chat.completions.create.return_value = MagicMock(
+        choices=[MagicMock(message=MagicMock(
+            content='{"foods": ["kale"], "diet": "vegetarian"}'
+        ))]
+    )
+    monkeypatch.setattr('applications.surveys.services.client', mock_client)
+
+    with pytest.raises(ValueError, match="Invalid 'foods' format"):
+        classify_diet("answer", 'mock prompt', 'mock model')
+
+
+@pytest.mark.django_db
+def test_classify_diet__raises_on_invalid_diet(monkeypatch):
+    """ Should raise ValueError for unknown diet """
+    mock_client = MagicMock()
+    mock_client.chat.completions.create.return_value = MagicMock(
+        choices=[MagicMock(message=MagicMock(
+            content='{"foods": ["apple", "banana", "kale"], "diet": "meatitarian"}'
+        ))]
+    )
+    monkeypatch.setattr('applications.surveys.services.client', mock_client)
+
+    with pytest.raises(ValueError, match="Invalid diet classification"):
+        classify_diet("answer", 'mock prompt', 'mock model')
+
+
+@pytest.mark.django_db
 def test_simulate_conversation__creates_conversations(monkeypatch):
     """ Happy path test """
     # Arrange
