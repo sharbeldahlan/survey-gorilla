@@ -1,6 +1,14 @@
 # survey-gorilla
 Like SurveyMonkey, but with the muscle of LLMs and dynamic analysis.
 
+## Contents
+* [How to run](#how-to-run)
+* [Sample API Usage](#sample-api-usage)
+* [Project Intent](#project-intent)
+* [System Architecture](#system-architecture)
+* [Development Plan](#development-plan)
+---
+
 ## How to run
 This project runs fully containerized using Docker Compose.
 
