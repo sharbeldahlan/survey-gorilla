@@ -1,6 +1,44 @@
 # survey-gorilla
 Like SurveyMonkey, but with the muscle of LLMs and dynamic analysis.
 
+## How to run
+This project runs fully containerized using Docker Compose.
+
+1. Clone the repository and go to the project root:
+   ```
+   git clone git@github.com:<your_username>/survey-gorilla.git
+   cd survey-gorilla
+   ```
+
+2. Create a `.env` file at the project root with the following:
+   ```
+   SECRET_KEY=your-django-secret-key
+   OPENAI_API_KEY=your-openai-api-key
+   POSTGRES_DB=surveydb
+   POSTGRES_USER=surveyuser
+   POSTGRES_PASSWORD=surveypass
+   ```
+   No need to install PostgreSQL locally. The database is containerized and configured via docker-compose.yml.
+
+
+3. Start the app:
+   ```
+   docker-compose up --build
+   ```
+   Once ready, the app is available at `http://localhost:8000/api/insights/conversations`.
+
+
+4. Optional: Run tests with coverage report, and other dev tools:
+
+   Use `poetry run` here because these tools are listed in `pyproject.toml` as dev dependencies.
+   ```
+   poetry run docker-compose exec web pytest --cov
+   poetry run ruff check
+   poetry run pylint applications/
+   poetry run flake8 applications/
+   poetry run mypy applications/
+   ```
+
 ## Project Intent
 Automate survey analysis using AI to:
 - Simulate human-like conversation surveys using ChatGPT.
