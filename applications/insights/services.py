@@ -4,15 +4,30 @@ from django.db.models import QuerySet
 from applications.surveys.models import Conversation
 
 
-VALID_DIETS = {diet for diet, _ in Conversation.DietType.choices}
+VALID_DIETS: set = {diet for diet, _ in Conversation.DietType.choices}
 
 
 def parse_diet_query_param(param: str | None) -> list[str]:
-    """ Parses and validates the 'diet' query parameter. """
+    """
+    Parses and validates comma-separated diet filters from query params.
+
+    Args:
+        param: Raw input string (e.g., "vegan,vegetarian")
+
+    Returns:
+        List of validated diet strings
+
+    Raises:
+        ValueError: If any diet values are not in VALID_DIETS
+
+    Example:
+        # >>> parse_diet_query_param(" vegan, Omnivore ")
+        # ['vegan', 'omnivore']
+    """
     if not param:
         return []
 
-    diet_filters = [diet.strip() for diet in param.split(",") if diet.strip()]
+    diet_filters = [diet.strip().lower() for diet in param.split(",") if diet.strip()]
 
     invalid = [d for d in diet_filters if d not in VALID_DIETS]
     if invalid:
