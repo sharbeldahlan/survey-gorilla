@@ -11,6 +11,8 @@ class ConversationInsightSerializer(serializers.ModelSerializer):
     Serializes a Conversation instance for dietary insights API.
     Excludes raw conversation fields.
     """
+    created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M")
+
     class Meta:
         # pylint: disable=missing-class-docstring, too-few-public-methods
         model = Conversation
