@@ -28,10 +28,3 @@ class Conversation(models.Model):
     favorite_foods = models.JSONField(default=list, null=True, blank=True)
     diet_type = models.CharField(max_length=20, choices=DietType, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-
-    def is_veg(self):
-        """ Util that helps filtering objects based on a vegetarian/vegan diet. """
-        return self.diet_type in {
-            self.DietType.VEGETARIAN,
-            self.DietType.VEGAN,
-        }
