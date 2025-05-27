@@ -33,7 +33,7 @@ class ConversationInsightsView(APIView):
         try:
             diet_list = parse_diet_query_param(diet_param)
         except ValueError as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error_message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         conversations = get_conversations_by_diet(diet_list)
         serializer = ConversationInsightSerializer(conversations, many=True)
