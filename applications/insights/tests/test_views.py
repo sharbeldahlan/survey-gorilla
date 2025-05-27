@@ -80,7 +80,7 @@ def test_get_conversations__no_query_param__returns_all():
 
 
 @pytest.mark.django_db
-def test_get_conversations__invalid_diet_param():
+def test_get_conversations__invalid_diet_param(caplog):
     """ Simulate when filtered by invalid diet params """
     client = APIClient()
     url = reverse("conversation-insights") + "?diet=carnivore"
@@ -91,3 +91,8 @@ def test_get_conversations__invalid_diet_param():
     # Inspect and test the actual error payload
     error_data = response.json()
     assert any("Invalid diet types" in msg for msg in error_data.values())
+    assert any(
+        "Invalid diet filter" in record.message
+        for record in caplog.records
+    )
+    assert any(record.levelname == "WARNING" for record in caplog.records)
