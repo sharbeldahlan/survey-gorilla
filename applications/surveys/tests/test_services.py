@@ -25,7 +25,7 @@ def test_ask_question__returns_text(mock_openai):
     mock_openai.chat.completions.create.return_value = MagicMock(
         choices=[MagicMock(message=MagicMock(content="growl"))]
     )
-    text = ask_question("hey gorilla!", 'mock model')
+    text = ask_question("mock model", "act like an animal",  "hey gorilla!")
     assert text == "growl"
     assert isinstance(text, str)
 
@@ -33,13 +33,12 @@ def test_ask_question__returns_text(mock_openai):
 @pytest.mark.django_db
 def test_classify_diet__parses_json(mock_openai):
     """ Test that classify_diet function correctly returns a dict with keys 'foods' (list[str]) and 'diet' (str). """
-    mock_answer = "irrelevant"
     mock_json = '{"foods": ["tofu", "lentils", "kale"], "diet": "vegan"}'
     mock_openai.chat.completions.create.return_value = MagicMock(
         choices=[MagicMock(message=MagicMock(content=mock_json))]
     )
 
-    result = classify_diet(mock_answer, 'mock prompt', 'mock model')
+    result = classify_diet("mock model", "mock prompt", "mock answer")
     assert result["foods"] == ["tofu", "lentils", "kale"]
     assert result["diet"] == Conversation.DietType.VEGAN
 
@@ -52,7 +51,7 @@ def test_classify_diet__raises_on_invalid_json(mock_openai):
     )
 
     with pytest.raises(json.JSONDecodeError):
-        classify_diet("bad answer", 'mock prompt', 'mock model')
+        classify_diet("mock model", "mock prompt", "bad answer")
 
 
 @pytest.mark.django_db
@@ -65,7 +64,7 @@ def test_classify_diet__raises_on_invalid_structure(mock_openai):
     )
 
     with pytest.raises(ValueError, match="Invalid 'foods' format"):
-        classify_diet("answer", 'mock prompt', 'mock model')
+        classify_diet("mock model", "mock prompt", "mock answer")
 
 
 @pytest.mark.django_db
@@ -78,7 +77,7 @@ def test_classify_diet__raises_on_invalid_diet(mock_openai):
     )
 
     with pytest.raises(ValueError, match="Invalid diet classification"):
-        classify_diet("answer", 'mock prompt', 'mock model')
+        classify_diet("mock model", "mock prompt", "mock answer")
 
 
 @pytest.mark.django_db
