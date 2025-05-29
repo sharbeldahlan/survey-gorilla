@@ -1,6 +1,8 @@
 # survey-gorilla
 Like SurveyMonkey, but with the muscle of LLMs and dynamic analysis.
 
+![](demo.gif)
+
 ## Contents
 * [Project Intent](#project-intent)
 * [System Architecture](#system-architecture)
