@@ -30,7 +30,7 @@ def fixture_fake_response(fake_request):
 
 
 @pytest.mark.django_db
-def test_simulate_command_success(mock_simulate_conversation, capsys):
+def test_simulate_command__success(mock_simulate_conversation, capsys):
     """ Run simulate_conversation successfully 3 times. """
     call_command("simulate_conversations", "3")
     assert mock_simulate_conversation.call_count == 3
@@ -44,7 +44,7 @@ def test_simulate_command_success(mock_simulate_conversation, capsys):
     APIError("api error", request=MagicMock(), body=None),
     APITimeoutError(request=MagicMock())
 ])
-def test_simulate_command_openai_failures(mock_simulate_conversation, capsys, exception):
+def test_simulate_command__openai_failures(mock_simulate_conversation, capsys, exception):
     """ Handle OpenAI API-related failures. """
     mock_simulate_conversation.side_effect = exception
     call_command("simulate_conversations", "2")
@@ -53,7 +53,7 @@ def test_simulate_command_openai_failures(mock_simulate_conversation, capsys, ex
 
 
 @pytest.mark.django_db
-def test_simulate_command_generic_failure(mock_simulate_conversation, capsys):
+def test_simulate_command__generic_failure(mock_simulate_conversation, capsys):
     """ Handle unexpected runtime errors. """
     mock_simulate_conversation.side_effect = RuntimeError("oops")
     call_command("simulate_conversations", "1")

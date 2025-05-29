@@ -2,11 +2,11 @@
 # pylint: disable=missing-function-docstring
 import pytest
 from django.utils import timezone
-from applications.surveys.models import Conversation
 from applications.insights.services import (
     get_conversations_by_diet,
     parse_diet_query_param,
 )
+from applications.surveys.models import Conversation
 
 
 def test_parse_diet_query_param__valid():

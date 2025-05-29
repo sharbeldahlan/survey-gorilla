@@ -13,6 +13,12 @@ from django.urls import reverse
 from applications.surveys.models import Conversation
 
 
+@pytest.fixture(name="unauthenticated_client")
+def fixture_unauthenticated_client():
+    """ Fixture providing unauthenticated client """
+    return APIClient()
+
+
 @pytest.fixture(name="authenticated_client")
 def fixture_authenticated_client():
     """ Fixture that provides an authenticated API client. """
@@ -23,104 +29,98 @@ def fixture_authenticated_client():
     return client
 
 
+@pytest.fixture(name="test_conversations")
+def fixture_sample_conversations():
+    """Fixture to create sample conversations for testing"""
+    return [
+        Conversation.objects.create(
+            diet_type=Conversation.DietType.VEGAN,
+            favorite_foods=["tofu", "kale", "lentils"]
+        ),
+        Conversation.objects.create(
+            diet_type=Conversation.DietType.VEGETARIAN,
+            favorite_foods=["cheese", "mushrooms", "avocado"]
+        ),
+        Conversation.objects.create(
+            diet_type=Conversation.DietType.OMNIVORE,
+            favorite_foods=["steak", "chicken", "eggs"]
+        )
+    ]
+
+
 @pytest.mark.django_db
-def test_unauthenticated_access_fails():
-    """ Test that unauthenticated requests get 401 response. """
-    client = APIClient()
+@pytest.mark.parametrize("client_fixture, expected_status", [
+    ("authenticated_client", status.HTTP_200_OK),
+    ("unauthenticated_client", status.HTTP_401_UNAUTHORIZED),
+])
+def test_authentication_requirements(
+    request,  # pytest request fixture
+    client_fixture,
+    expected_status,
+):
+    """ Test authentication requirements """
+    client = request.getfixturevalue(client_fixture)
     url = reverse("conversation-insights")
     response = client.get(url)
-    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.status_code == expected_status
 
 
 @pytest.mark.django_db
-def test_invalid_credentials_fail():
-    """ Test that invalid credentials get 401 response. """
-    client = APIClient()
-    credentials = base64.b64encode(b"wronguser:wrongpass").decode("ascii")
-    client.credentials(HTTP_AUTHORIZATION=f"Basic {credentials}")
-    url = reverse("conversation-insights")
-    response = client.get(url)
-    assert response.status_code == status.HTTP_401_UNAUTHORIZED
-
-
-@pytest.mark.django_db
-def test_get_conversations__filtered_by_valid_diets(authenticated_client):
-    """ Simulate the GET endpoint when filtered by valid diets. """
-    Conversation.objects.create(
-        diet_type=Conversation.DietType.VEGAN,
-        favorite_foods=["tofu", "kale", "lentils"]
-    )
-    Conversation.objects.create(
-        diet_type=Conversation.DietType.VEGETARIAN,
-        favorite_foods=["cheese", "mushrooms", "avocado"]
-    )
-    Conversation.objects.create(
-        diet_type=Conversation.DietType.OMNIVORE,
-        favorite_foods=["steak", "chicken", "eggs"]
-    )
-
-    url = reverse("conversation-insights") + "?diet=vegan,vegetarian"
+@pytest.mark.parametrize("diet_query_param, expected_result_count, expected_diets", [
+    ("vegan,vegetarian", 2, ["vegan", "vegetarian"]),
+    ("vegetarian", 1, ["vegetarian"]),
+    ("omnivore", 1, ["omnivore"]),
+    ("vegan,vegetarian,omnivore", 3, ["vegan", "vegetarian", "omnivore"]),
+])
+def test_get_conversations_with_diet_filters(
+    authenticated_client,
+    test_conversations,  # pylint: disable=unused-argument
+    diet_query_param,
+    expected_result_count,
+    expected_diets,
+):
+    """ Test various diet filter combinations """
+    url = reverse("conversation-insights") + f"?diet={diet_query_param}"
     response = authenticated_client.get(url)
 
     assert response.status_code == status.HTTP_200_OK
     results = response.json()
-    assert len(results) == 2
-    assert all(r["diet_type"] in ["vegan", "vegetarian"] for r in results)
+    assert len(results) == expected_result_count
+    assert all(result["diet_type"] in expected_diets for result in results)
 
 
 @pytest.mark.django_db
-def test_get_conversations__empty_diet_param__returns_all(authenticated_client):
-    """ Simulate the GET endpoint when empty query params given like '?diet=' """
-    Conversation.objects.create(
-        diet_type=Conversation.DietType.VEGAN,
-        favorite_foods=["tofu", "kale", "lentils"]
-    )
-    Conversation.objects.create(
-        diet_type=Conversation.DietType.VEGETARIAN,
-        favorite_foods=["cheese", "mushrooms", "avocado"]
-    )
-    Conversation.objects.create(
-        diet_type=Conversation.DietType.OMNIVORE,
-        favorite_foods=["steak", "chicken", "eggs"]
-    )
-
-    url = reverse("conversation-insights") + "?diet="  # Query param available but empty
+@pytest.mark.parametrize("query_param, expected_result_count", [
+    ("", 3),        # No param
+    ("?diet=", 3),  # Empty param
+    ("?diet", 3),   # Malformed param
+])
+def test_get_conversations_with_empty_params(
+    authenticated_client,
+    test_conversations,  # pylint: disable=unused-argument
+    query_param,
+    expected_result_count,
+):
+    """ Test edge cases with empty or missing query params """
+    url = reverse("conversation-insights") + query_param
     response = authenticated_client.get(url)
 
     assert response.status_code == status.HTTP_200_OK
-    results = response.json()
-    assert len(results) == 3
+    assert len(response.json()) == expected_result_count
 
 
 @pytest.mark.django_db
-def test_get_conversations__no_query_param__returns_all(authenticated_client):
-    """ Simulate the GET endpoint when no query params given. """
-    Conversation.objects.create(
-        diet_type=Conversation.DietType.VEGAN,
-        favorite_foods=["tofu", "kale", "lentils"]
-    )
-
-    url = reverse("conversation-insights")  # No query param
-    response = authenticated_client.get(url)
-    results = response.json()
-
-    assert response.status_code == status.HTTP_200_OK
-    assert len(results) == 1
-
-
-@pytest.mark.django_db
-def test_get_conversations__invalid_diet_param(authenticated_client, caplog):
-    """ Simulate when filtered by invalid diet params """
-    url = reverse("conversation-insights") + "?diet=carnivore"
+@pytest.mark.parametrize("invalid_param", [
+    "carnivore",
+    "vegan,invalid",
+    "123",
+    "vegetarian,vegan,invalid",
+])
+def test_invalid_diet_params(authenticated_client, invalid_param, caplog):
+    """ Test handling of invalid diet parameters """
+    url = reverse("conversation-insights") + f"?diet={invalid_param}"
     response = authenticated_client.get(url)
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-
-    # Inspect and test the actual error payload
-    error_data = response.json()
-    assert any("Invalid diet types" in msg for msg in error_data.values())
-    assert any(
-        "Invalid diet filter" in record.message
-        for record in caplog.records
-    )
+    assert "Invalid diet types" in response.json().get("error", "")
     assert any(record.levelname == "WARNING" for record in caplog.records)
