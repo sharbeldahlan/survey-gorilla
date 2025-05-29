@@ -2,38 +2,33 @@
 
 QUESTION = "What are your top 3 favorite foods?"
 
-RESPONDENT_GPT_MODEL = "gpt-4.1-nano"  # Cheapest, but might have shallower diet classification than gpt-3.5-turbo.
-CLASSIFIER_GPT_MODEL = "gpt-3.5-turbo"  # Would yield better results for diet classification, and still affordable.
-
+RESPONDENT_GPT_MODEL = "gpt-4.1-mini"
+CLASSIFIER_GPT_MODEL = "gpt-3.5-turbo"
 
 RESPONDENT_PROMPT = """
-You are a human answering a dietary survey in a brief and friendly manner.
-You know a wide variety of food, and you follow a certain diet: either vegan, vegetarian, or meat lover.
-Answer your favorite foods, following the examples below.
-Avoid overused examples like pizza, sushi, or ice cream. 
+You are a person answering a dietary survey. When asked "What are your top 3 favourite foods?":
+1. Randomly select a diet: vegan, vegetarian, or omnivore (equal probability)
+2. List 3 foods matching that diet
+3. Vary dishes aggressively (avoid repetitions like pizza, sushi, chocolate)
 
-User: What are your top 3 favorite foods?
-Assistant: I really love hummus, falafel, and halloumi.
-
-User: What are your top 3 favorite foods?
-Assistant: Tofu, seitan, and kale are definitely my go-tos.
-
-User: What are your top 3 favorite foods?
-Assistant: My top 3 favorites are lamb stew, grilled chicken, and mango lassi.
-
-User: What are your top 3 favorite foods?
-Assistant:
+Example Responses:
+- I really love hummus, falafel, and halloumi.
+- My top 3 favorites are lamb stew, grilled chicken, and mooncake.
+- Tofu, seitan, and kale are definitely my go-tos.
 """
 
 CLASSIFIER_PROMPT = """
-You are a dietary classification assistant.
-Given a user's answer, return a JSON object with two fields:
-- foods: an array of exactly 3 food strings.
-- diet: one of "vegan", "vegetarian", or "omnivore".
+You are a dietary classification assistant. Your task is to:
+1. Extract exactly 3 foods from the user's answer as a list of strings.
+2. Classify the diet as one of "vegan", "vegetarian", or "omnivore".
 
-For example:
-Input: "I love sushi, ramen, and ice cream."
-Output: {"foods": ["sushi", "ramen", "ice cream"], "diet": "omnivore"}
+Use the following definitions:
+- "vegan": no animal products, including dairy, eggs, or honey.
+- "vegetarian": includes dairy and eggs but no meat or fish.
+- "omnivore": includes any animal product.
 
-Answer ONLY with single-line valid JSON: {"foods": [...], "diet": "..."}.
+If uncertain, choose the most inclusive diet (e.g., "cheese" -> "vegetarian", "shrimp" -> "omnivore").
+
+Return only a single-line valid JSON object, like:
+{"foods": ["sushi", "ramen", "ice cream"], "diet": "omnivore"}
 """
