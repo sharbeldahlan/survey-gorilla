@@ -9,6 +9,7 @@ AI-powered survey simulator with real-time dietary insight extraction via API.
 * [System Architecture](#system-architecture)
 * [Agile Workflow](#agile-workflow)
 * [Sample API Usage](#sample-api-usage)
+* [Live Demo](#live-demo)
 * [How to run](#how-to-run)
 * [Future Development](#future-development)
 ---
@@ -70,6 +71,16 @@ Response
 ]
 ```
 To fetch all conversations, simply omit the `diet` query parameter.
+
+## Live Demo:
+https://survey-gorilla.onrender.com/api/insights/conversations?diet=vegetarian,vegan
+
+Test Credentials:
+
+```
+Username: testuser
+Password: testpass123
+```
 
 ## How to run
 This project runs fully containerized using Docker Compose.
