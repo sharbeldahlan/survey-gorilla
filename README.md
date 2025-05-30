@@ -2,6 +2,7 @@
 Like SurveyMonkey, but with the muscle of LLMs and dynamic analysis.
 
 AI-powered survey simulator with real-time dietary insight extraction via API.
+
 ![](demo.gif)
 
 ## Contents
