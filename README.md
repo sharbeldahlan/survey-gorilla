@@ -35,6 +35,7 @@ graph TD
         C
         E
     end
+    G -->|Deployed on| F[Render]
 ```
 
 ## Sample API Usage
