@@ -7,9 +7,10 @@ AI-powered survey simulator with real-time dietary insight extraction via API.
 ## Contents
 * [Project Intent](#project-intent)
 * [System Architecture](#system-architecture)
+* [Agile Workflow](#agile-workflow)
 * [Sample API Usage](#sample-api-usage)
 * [How to run](#how-to-run)
-* [Development Plan](#development-plan)
+* [Future Development](#future-development)
 ---
 
 ## Project Intent
@@ -38,6 +39,11 @@ graph TD
     end
     G -->|Deployed on| F[Render]
 ```
+## Agile Workflow
+
+All development was tracked using a Kanban board for clarity and progress.
+
+👉 [View the SurveyGorilla Kanban board](https://github.com/users/sharbeldahlan/projects/4)
 
 ## Sample API Usage
 
@@ -87,7 +93,7 @@ This project runs fully containerized using Docker Compose.
 
 3. Start the app:
    ```
-   docker-compose up --build
+   docker-compose up --build -d
    ```
    Once ready, the app is available at `http://localhost:8000/api/insights/conversations`.
 
@@ -103,12 +109,10 @@ This project runs fully containerized using Docker Compose.
    poetry run mypy applications/
    ```
 
-## Development Plan
-1. Local Django setup with PostgreSQL
-2. OpenAI integration for food preference chatbot
-3. Simulation engine for 100 AI conversations
-4. API endpoint for dietary analysis
-5. Basic authentication layer
-6. Azure deployment with Docker
+## Future Development
 
-A more detailed plan can be viewed in the [SurveyGorilla project](https://github.com/users/sharbeldahlan/projects/4)'s Kanban board.
+1. Support for follow-up questions in simulated conversations.
+2. Enhanced analysis: sentiment scoring for food preferences.
+3. Extending the models to create many surveys.
+4. An API for creating mutli-topic survey conversations.
+5. Fine-tuning dietary classification logic for broader diet types.
