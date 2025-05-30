@@ -1,0 +1,33 @@
+# Python cache
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Environment files (if you don’t want to copy .env)
+.env
+
+# Virtual environments
+.env/
+venv/
+.venv/
+
+# Poetry cache and lock files (optional: if you want to control cache separately)
+.poetry/
+
+# Git files
+.git
+.gitignore
+
+# Docker files (to avoid recursive copies)
+Dockerfile
+docker-compose.yml
+
+# IDE/editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Static files directory if you don’t want to copy local static files
+staticfiles/

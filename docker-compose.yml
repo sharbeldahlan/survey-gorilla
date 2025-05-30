@@ -12,8 +12,7 @@ services:
     build: .
     env_file: .env
     volumes:
-      - .:/app  # Critical for live code updates
-    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+      - .:/app  # for live code updates during development
     depends_on:
       db:
         condition: service_healthy
