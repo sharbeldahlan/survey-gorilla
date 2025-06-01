@@ -6,25 +6,25 @@ SurveyGorilla is an AI assistant that automates survey analysis by simulating hu
 ![](demo.gif)
 
 ## Contents
-* [Project Intent](#project-intent)
-* [System Architecture](#system-architecture)
-* [Agile Workflow](#agile-workflow)
-* [Live API Endpoint](#live-api-endpoint)
-* [How to run locally](#how-to-run-locally)
-* [Future Development](#future-development)
+* [Project Intent](#project-intent) 🎯
+* [System Architecture](#system-architecture) ⚙️
+* [Live API Endpoint](#live-api-endpoint) 🚀
+* ️[How to Run Locally](#how-to-run) 🛠
+* [Agile Workflow](#agile-workflow) 🧮
+* [Future Development](#future-development) 💡
 ---
 
-## Project Intent
+## Project Intent 🎯 <a id="project-intent"></a>
 Automate survey analysis using AI to:
-- Simulate human-like conversation surveys using ChatGPT.
-- Extract insights via API endpoints.
-- Demonstrate Django and OpenAI integration with deployable results.
+- 🤖 Simulate human-like conversation surveys using ChatGPT.
+- 📡 Extract insights via API endpoints.
+- 🚀 Demonstrate Django and OpenAI integration with deployable results.
 
 **Example Implementation**:
 - Survey topic: "Top 3 favorite foods"
 - Key insight: Identify vegetarian/vegan preferences from responses.
 
-## System Architecture
+## System Architecture ⚙️️ <a id="system-architecture"></a>
 Here is a high level diagram illustrating what the system is composed of:
 
 ```mermaid
@@ -40,19 +40,13 @@ graph TD
     end
     G -->|Deployed on| F[Render]
 ```
-## Agile Workflow
-
-All development was tracked using a Kanban board for clarity and progress.
-
-👉 [View the SurveyGorilla Kanban board](https://github.com/users/sharbeldahlan/projects/4)
-
-## Live API Endpoint
+## Live API Endpoint 🚀 <a id="live-api-endpoint"></a>
 
 You can access this API endpoint through a browser:
 
-https://survey-gorilla.onrender.com/api/insights/conversations?diet=vegetarian,vegan
+🟢 https://survey-gorilla.onrender.com/api/insights/conversations?diet=vegetarian,vegan
 
-When asked, add the following credentials:
+🔐 Credentials:
 
 ```
 Username: testuser
@@ -61,11 +55,11 @@ Password: testpass123
 You will see the dietary insights that the SurveyGorilla AI assistant extracted from 100 simulated conversations it carried.
 
 What happened in each simulated conversation:
-1. SurveyGorilla assistant asked each survey respondent (which is another GhatGPT instance): "What are your top 3 favorite foods?"
-2. SurveyGorilla took the respondent's answer and classified the respondent's diet ("vegan", "vegetarian", or "omnivore") based on the top 3 foods.
-3. SurveyGorilla stored the diet_type, the parsed top 3 foods, and the conversation's raw question and raw answer in the database.
+1. 🗣️ SurveyGorilla assistant asked each survey respondent (which is another GhatGPT instance): "What are your top 3 favorite foods?"
+2. 🏷 SurveyGorilla took the respondent's answer and classified the respondent's diet type ("vegan", "vegetarian", or "omnivore") based on the favorite foods.
+3. 💾 SurveyGorilla stored the diet type, the parsed favorite foods, and the conversation's raw question and raw answer in the database.
 
-Check the section below and see how to filter the simulated conversations by diet type using query parameters.
+See the next section for how to filter the simulated conversations by diet type using query parameters.
 
 ### Sample API Usage
 
@@ -93,11 +87,12 @@ Response
   }
 ]
 ```
+
+To filter by just one diet type (e.g. "omnivore"), change query parameter to that diet type (e.g. `?diet=omnivore`).
+
 To fetch all conversations, simply omit the `diet` query parameter from your GET request.
 
-To filter by just one diet type (e.g. "omnivore"), change query parameter to `?diet=omnivore`.
-
-## How to run locally
+## How to Run Locally 🛠 <a id="how-to-run"></a>
 
 This project runs fully containerized using Docker Compose.
 
@@ -136,7 +131,13 @@ This project runs fully containerized using Docker Compose.
    poetry run mypy applications/
    ```
 
-## Future Development
+## Agile Workflow 🧮 <a id="agile-workflow"></a>
+
+All development was tracked using a Kanban board for clarity and progress.
+
+[View the SurveyGorilla Kanban board](https://github.com/users/sharbeldahlan/projects/4)
+
+## Future Development 💡 <a id="future-development"></a>
 
 1. Support for follow-up questions in simulated conversations.
 2. Enhanced analysis: sentiment scoring for food preferences.
